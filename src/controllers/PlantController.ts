@@ -108,21 +108,64 @@ export const updatePlant = async (req: Request, res: Response) => {
 
     const { nome, especie, preco, estoque, luminosidade, petFriendly, regaACadaDias } = req.body;
 
+    const dataToUpdate: any = {};
+
+    if (nome !== undefined) {
+      if (typeof nome !== "string" || nome.trim() === "") {
+        return res.status(400).json({ message: "Nome inválido." });
+      }
+      dataToUpdate.nome = nome;
+    }
+
+    if (especie !== undefined) {
+      if (typeof especie !== "string" || especie.trim() === "") {
+        return res.status(400).json({ message: "Espécie inválida." });
+      }
+      dataToUpdate.especie = especie;
+    }
+
+    if (preco !== undefined) {
+      if (!Number.isInteger(preco) || preco <= 0) {
+        return res.status(400).json({ message: "Preço inválido." });
+      }
+      dataToUpdate.preco = preco;
+    }
+
+    if (estoque !== undefined) {
+      if (!Number.isInteger(estoque) || estoque < 0) {
+        return res.status(400).json({ message: "Estoque inválido." });
+      }
+      dataToUpdate.estoque = estoque;
+    }
+
+    if (regaACadaDias !== undefined) {
+      if (!Number.isInteger(regaACadaDias) || regaACadaDias < 1) {
+        return res.status(400).json({ message: "Número de dias para rega inválido." });
+      }
+      dataToUpdate.regaACadaDias = regaACadaDias;
+    }
+
+    if (luminosidade !== undefined) {
+      if (!Object.values(Luminosidade).includes(luminosidade)) {
+        return res.status(400).json({ message: "Luminosidade inválida." });
+      }
+      dataToUpdate.luminosidade = luminosidade;
+    }
+
+    if (petFriendly !== undefined) {
+      if (typeof petFriendly !== "boolean") {
+        return res.status(400).json({ message: "O campo petFriendly deve ser booleano." });
+      }
+      dataToUpdate.petFriendly = petFriendly;
+    }
+
     const plant = await PlantRepository.findPlantById(id);
 
     if (!plant) {
       return res.status(404).json({ message: "Planta não encontrada." });
     }
 
-    const updatedPlant = await PlantRepository.updatePlant(id, {
-      nome: nome,
-      especie: especie,
-      preco: preco,
-      estoque: estoque,
-      luminosidade: luminosidade,
-      petFriendly: petFriendly,
-      regaACadaDias: regaACadaDias
-    });
+    const updatedPlant = await PlantRepository.updatePlant(id, dataToUpdate);
 
     return res.status(200).json(updatedPlant);
 
